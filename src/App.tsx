@@ -1,4 +1,4 @@
-import { Button, Input, message, Modal } from 'antd'
+import { Button, Input, InputNumber, message, Modal } from 'antd'
 import { useState } from 'react'
 import Box, { BORDER } from './Box'
 
@@ -12,7 +12,11 @@ function App() {
   const [nameList, setNameList] = useState<string[]>([])
   /** 是否能开始抽卡 */
   const [canDraw, setCanDraw] = useState(false)
-  const [canHover, setCanHover] = useState(false)
+  /** 设置抽奖次数 */
+  const [drawCount, setDrawCount] = useState(0)
+  /** 剩余抽奖次数 */
+  const [leftDrawCount, setLeftDrawCount] = useState(0)
+  /** 已经抽到的卡片列表 */
   const [openCardList, setOpenCardList] = useState<number[]>([])
 
   // 每行名字
@@ -37,14 +41,15 @@ function App() {
               {row.map((name, j) => (
                 <Box
                   key={j}
-                  open={canDraw || openCardList.includes(i * ROW_COUNT + j)}
+                  open={openCardList.includes(i * ROW_COUNT + j)}
                   name={name}
-                  canHover={canHover}
+                  canHover={canDraw}
                   onClick={() => {
                     const index = i * ROW_COUNT + j
                     // 点击盖卡，翻开
-                    if (!canDraw && canHover) {
+                    if (canDraw && leftDrawCount > 0) {
                       setOpenCardList([...openCardList, index])
+                      setLeftDrawCount(leftDrawCount - 1)
                     }
                   }}
                 />
@@ -52,27 +57,51 @@ function App() {
             </div>
           ))}
         </div>
-        <div className="flex justify-center mt-8 gap-4">
-          <Button
-            type="primary"
-            size="large"
-            onClick={() => setShowInputModal(true)}
-          >
-            导入
-          </Button>
-          <Button
-            type="primary"
-            size="large"
-            disabled={nameList.length < 1}
-            onClick={() => {
-              setOpenCardList([])
-              setCanHover(true)
-              setNameList(nameList.sort(() => Math.random() - 0.5))
-              setCanDraw(false)
-            }}
-          >
-            开始
-          </Button>
+        <div className="flex flex-col mt-8 gap-4 text-xl">
+          <div>
+            1.
+            <Button
+              className="ml-4 w-28"
+              type="primary"
+              size="large"
+              onClick={() => setShowInputModal(true)}
+            >
+              导入
+            </Button>
+          </div>
+          <div className="flex items-center">
+            2.
+            <div className="ml-4">设置抽奖次数：</div>
+            <InputNumber
+              disabled={nameList.length === 0}
+              min={1}
+              max={nameList.length - 1}
+              onChange={(val) => val && setDrawCount(val)}
+            />
+          </div>
+          <div>
+            3.
+            <Button
+              className="ml-4 w-28"
+              type="primary"
+              size="large"
+              // 抽奖项太少不能开始
+              disabled={nameList.length < 1}
+              onClick={() => {
+                // 还未开始则开始抽奖，或全部抽完进行重置
+                if (!canDraw || leftDrawCount == 0) {
+                  setOpenCardList([])
+                  setNameList(nameList.sort(() => Math.random() - 0.5))
+                  setLeftDrawCount(drawCount)
+                  setCanDraw(true)
+                }
+              }}
+            >
+              {!canDraw && '开始抽奖'}
+              {canDraw && !!leftDrawCount && `剩余次数：${leftDrawCount}`}
+              {canDraw && !leftDrawCount && '重置'}
+            </Button>
+          </div>
         </div>
         <Modal
           title="填写抽奖名单，每个名称一行"
@@ -85,7 +114,6 @@ function App() {
               message.info('抽奖名单至少需要2条，无法抽奖')
             } else {
               setShowInputModal(false)
-              setCanHover(true)
               setNameList(lineList)
               // 预览所有卡片
               setOpenCardList(
