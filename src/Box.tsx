@@ -20,7 +20,7 @@ const Box: FC<BoxProps> = ({ open, name, canHover, onClick }) => {
       }}
       onClick={onClick}
     >
-      {open && <div>{name}</div>}
+      {open && <div className="break-all">{name}</div>}
       <div
         className={`absolute w-full h-full z-10 bg-gray-500 ${canHover ? 'hover:bg-gray-400' : ''}`}
         style={{

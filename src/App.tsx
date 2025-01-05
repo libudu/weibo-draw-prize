@@ -38,22 +38,24 @@ function App() {
               className="flex"
               key={i}
             >
-              {row.map((name, j) => (
-                <Box
-                  key={j}
-                  open={openCardList.includes(i * ROW_COUNT + j)}
-                  name={name}
-                  canHover={canDraw}
-                  onClick={() => {
-                    const index = i * ROW_COUNT + j
-                    // 点击盖卡，翻开
-                    if (canDraw && leftDrawCount > 0) {
-                      setOpenCardList([...openCardList, index])
-                      setLeftDrawCount(leftDrawCount - 1)
-                    }
-                  }}
-                />
-              ))}
+              {row.map((name, j) =>
+                canDraw && i * ROW_COUNT + j >= drawCount ? null : (
+                  <Box
+                    key={j}
+                    open={openCardList.includes(i * ROW_COUNT + j)}
+                    name={name}
+                    canHover={canDraw}
+                    onClick={() => {
+                      const index = i * ROW_COUNT + j
+                      // 点击盖卡，翻开
+                      if (canDraw && leftDrawCount > 0) {
+                        setOpenCardList([...openCardList, index])
+                        setLeftDrawCount(leftDrawCount - 1)
+                      }
+                    }}
+                  />
+                )
+              )}
             </div>
           ))}
         </div>
@@ -88,12 +90,21 @@ function App() {
               // 抽奖项太少不能开始
               disabled={nameList.length < 1}
               onClick={() => {
-                // 还未开始则开始抽奖，或全部抽完进行重置
-                if (!canDraw || leftDrawCount == 0) {
+                // 还未开始则开始抽奖
+                if (!canDraw) {
                   setOpenCardList([])
                   setNameList(nameList.sort(() => Math.random() - 0.5))
                   setLeftDrawCount(drawCount)
                   setCanDraw(true)
+                }
+                // 所有卡片抽完，重置进入预览
+                if (canDraw && !leftDrawCount) {
+                  setCanDraw(false)
+                  setOpenCardList(
+                    Array(nameList.length)
+                      .fill(1)
+                      .map((_, index) => index)
+                  )
                 }
               }}
             >
