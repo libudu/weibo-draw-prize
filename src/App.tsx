@@ -1,94 +1,111 @@
-import { Button, Input, message, Modal } from 'antd';
-import { useState } from 'react';
-import Box, { BORDER } from './Box';
+import { Button, Input, message, Modal } from 'antd'
+import { useState } from 'react'
+import Box, { BORDER } from './Box'
 
-let inputText = '';
+let inputText = ''
 
 const getRandomResult = (nameList: string[], total: number) => {
-  const result: Record<string, number> = {};
-  nameList.forEach((name) => result[name] = 0);
-  for(let i = 0; i < total; i += 1) {
-    const r = Math.floor(Math.random() * nameList.length);
-    const name = nameList[r];
-    result[name] += 1;
+  const result: Record<string, number> = {}
+  nameList.forEach((name) => (result[name] = 0))
+  for (let i = 0; i < total; i += 1) {
+    const r = Math.floor(Math.random() * nameList.length)
+    const name = nameList[r]
+    result[name] += 1
   }
-  return result;
+  return result
 }
 
-
-const ROW_COUNT = 5;
+const ROW_COUNT = 5
 
 function App() {
-  const [showInputModal, setShowInputModal] = useState(false);
-  const [nameList, setNameList] = useState<string[]>([]);
-  const [countMap, setCountMap] = useState<Record<string, number>>({});
-  const [enable, setEnable] = useState(false);
-  const [canHover, setCanHover] = useState(false);
-  const [selectCard, setSelectCard] = useState<number | null>(null);
+  const [showInputModal, setShowInputModal] = useState(false)
+  const [nameList, setNameList] = useState<string[]>([])
+  const [countMap, setCountMap] = useState<Record<string, number>>({})
+  const [enable, setEnable] = useState(false)
+  const [canHover, setCanHover] = useState(false)
+  const [selectCard, setSelectCard] = useState<number | null>(null)
 
   // 每行名字
-  const rowList: string[][] = [];
+  const rowList: string[][] = []
   // 当前没有名单则用黑框代替
-  const templateList = nameList.length > 1 ? nameList : Array(ROW_COUNT * 3).fill(null);
-  for(let i = 0; i < templateList.length; i += ROW_COUNT) {
-    rowList.push(templateList.slice(i, i + ROW_COUNT));
+  const templateList =
+    nameList.length > 1 ? nameList : Array(ROW_COUNT * 3).fill(null)
+  for (let i = 0; i < templateList.length; i += ROW_COUNT) {
+    rowList.push(templateList.slice(i, i + ROW_COUNT))
   }
 
   const startRandom = (total: number) => {
-    setEnable(false);
+    setEnable(false)
     setTimeout(() => {
-      const result = getRandomResult(nameList, total);
-      setCountMap(result);
-      setEnable(true);
-    }, 0);
-  };
+      const result = getRandomResult(nameList, total)
+      setCountMap(result)
+      setEnable(true)
+    }, 0)
+  }
 
   return (
     <div className="w-screen flex justify-center p-20">
-      <div className="flex flex-col items-center" style={{ width: 400 }}>
+      <div
+        className="flex flex-col items-center"
+        style={{ width: 400 }}
+      >
         <div className="text-4xl mb-8">🉑🉑🐯抽奖系统</div>
         <div style={{ borderTop: BORDER, borderLeft: BORDER }}>
-          {
-            rowList.map((row, i) => <div className="flex" key={i}>
-              {
-                row.map((name, j) => <Box
+          {rowList.map((row, i) => (
+            <div
+              className="flex"
+              key={i}
+            >
+              {row.map((name, j) => (
+                <Box
                   key={j}
-                  enable={enable || (i * ROW_COUNT + j) == selectCard }
+                  enable={enable || i * ROW_COUNT + j == selectCard}
                   name={name}
                   count={countMap[name] || 0}
-                  delay={(i * ROW_COUNT + j) == selectCard ? 0 : i * 0.5 * ROW_COUNT + j * 0.5}
+                  delay={
+                    i * ROW_COUNT + j == selectCard
+                      ? 0
+                      : i * 0.5 * ROW_COUNT + j * 0.5
+                  }
                   canHover={canHover}
                   onClick={() => {
-                    const index = i * ROW_COUNT + j;
+                    const index = i * ROW_COUNT + j
                     // 点击盖卡，翻开
-                    if(!enable && canHover) {
-                      if(countMap[name]) {
-                        countMap[name] += 1;
+                    if (!enable && canHover) {
+                      if (countMap[name]) {
+                        countMap[name] += 1
                       } else {
-                        countMap[name] = 1;
+                        countMap[name] = 1
                       }
-                      setSelectCard(index);
-                      setCanHover(false);
+                      setSelectCard(index)
+                      setCanHover(false)
                     }
                     // 点击已选择的卡，重置
-                    if(index == selectCard) {
-                      setSelectCard(null);
-                      setCanHover(true);
-                      setNameList(nameList.sort(() => Math.random() - 0.5));
+                    if (index == selectCard) {
+                      setSelectCard(null)
+                      setCanHover(true)
+                      setNameList(nameList.sort(() => Math.random() - 0.5))
                     }
                   }}
-                />)
-              }
-            </div>)
-          }
+                />
+              ))}
+            </div>
+          ))}
         </div>
         <div className="flex justify-center mt-8">
           <Button
             type="primary"
             size="large"
+            onClick={() => {}}
+          >
+            微博链接导入
+          </Button>
+          <Button
+            type="primary"
+            size="large"
             onClick={() => setShowInputModal(true)}
           >
-            导入名单
+            手动导入
           </Button>
           <Button
             className="ml-4"
@@ -96,11 +113,11 @@ function App() {
             size="large"
             disabled={nameList.length < 1}
             onClick={() => {
-              setSelectCard(null);
-              setCanHover(true);
-              setNameList(nameList.sort(() => Math.random() - 0.5));
-              setCountMap({});
-              setEnable(false);
+              setSelectCard(null)
+              setCanHover(true)
+              setNameList(nameList.sort(() => Math.random() - 0.5))
+              setCountMap({})
+              setEnable(false)
             }}
           >
             重置
@@ -129,19 +146,22 @@ function App() {
           visible={showInputModal}
           onCancel={() => setShowInputModal(false)}
           onOk={() => {
-            setEnable(false);
-            const lineList = inputText.split('\n').filter(l => l);
-            if(lineList.length <= 1) {
-              message.info("抽奖名单至少需要2条，无法抽奖")
+            setEnable(false)
+            const lineList = inputText.split('\n').filter((l) => l)
+            if (lineList.length <= 1) {
+              message.info('抽奖名单至少需要2条，无法抽奖')
             } else {
               lineList.sort(() => Math.random() - 0.5)
-              setNameList(lineList);
-              setShowInputModal(false);
-              setCanHover(true);
+              setNameList(lineList)
+              setShowInputModal(false)
+              setCanHover(true)
             }
           }}
         >
-          <Input.TextArea rows={8} onChange={(e) => inputText = e.target.value}></Input.TextArea>
+          <Input.TextArea
+            rows={8}
+            onChange={(e) => (inputText = e.target.value)}
+          ></Input.TextArea>
         </Modal>
       </div>
     </div>
